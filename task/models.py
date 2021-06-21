@@ -119,17 +119,16 @@ class Task(models.Model):
                                 blank=False,
                                 help_text='一行一个元素选择器，每一行的格式为：选择器名称{选择器内容}，\
             例如：title{//*[@id="id3"]/h3/text()}。其中 url 为系统保留选择器名称，请不要使用且无法被覆盖')
-    template = models.TextField(
-        verbose_name='消息体模板',
-        blank=True,
-        help_text='可为空，自定义发送的通知内容格式，按照选择器名称进行替换，具体示例见文档')
+    template = models.TextField(verbose_name='消息体模板',
+                                blank=True,
+                                help_text='可为空，自定义发送的通知内容格式，按照选择器名称进行替换，具体示例见文档')
     is_chrome_choices = ((0, 'no'), (1, 'yes'))
     is_chrome = models.IntegerField(null=False,
                                     default='no',
                                     verbose_name='是否使用无头浏览器',
                                     choices=is_chrome_choices)
     frequency = models.FloatField(null=False,
-                                  default=5,
+                                  default=1,
                                   verbose_name='频率(分钟)',
                                   validators=[MinValueValidator(0)])
     create_time = models.DateTimeField(null=False,

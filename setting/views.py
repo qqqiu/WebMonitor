@@ -10,7 +10,7 @@ def log_view(request):
 
     content = '日志文件不存在'
     if os.path.exists(log_path):
-        with open(log_path, 'r') as f:
+        with open(log_path, 'r', encoding='utf-8') as f:
             content = f.readlines()[-50:]
     content = ''.join(content)
     return render(request, 'log.html', {'content': content})

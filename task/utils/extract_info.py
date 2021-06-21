@@ -77,7 +77,7 @@ def get_content(url,
 
     if regular_expression:
         content = extract_by_re(content, regular_expression)
-    return content
+    return content, content_dict
 
 
 @func_set_timeout(10)

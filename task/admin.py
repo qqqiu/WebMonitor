@@ -43,7 +43,7 @@ class TaskAdmin(ImportExportModelAdmin):
     resource_class = TaskResource
 
     list_display = [
-        'id', 'name', 'url', 'frequency', 'selector', 'create_time',
+        'id', 'name', 'url', 'template', 'frequency', 'selector', 'create_time',
         'is_chrome', 'regular_expression', 'rule', 'headers'
     ]
     list_editable = ('name', 'url', 'frequency', 'is_chrome',

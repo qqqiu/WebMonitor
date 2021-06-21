@@ -28,7 +28,7 @@ def wraper_rss_msg(item):
     return res
 
 
-def send_message(content, header, notifications):
+def send_message(content, header, notifications, img_url=''):
     if len(notifications) == 0:
         raise Exception('通知方式为空')
 
@@ -48,7 +48,7 @@ def send_message(content, header, notifications):
                 content = markdown.markdown(content,
                                             output_format='html5',
                                             extensions=['extra'])
-                handler.send(notification_detail, header, content)
+                handler.send(notification_detail, header, content, img_url)
         except Exception as e:
             fail += 1
             exception_content += 'Mail Exception: {};'.format(repr(e))
@@ -135,9 +135,12 @@ def monitor(id, type):
                 last = Content(task_id=id)
 
             last_content = last.content
-            content = get_content(url, is_chrome, selector_type, selector,
+            content, content_dict = get_content(url, is_chrome, selector_type, selector,
                                   content_template, regular_expression,
                                   headers)
+            img_url = ''
+            if 'img' in content_dict:
+                img_url = content_dict['img']
             global_content = content
             status_code = is_changed(rule, content, last_content)
             logger.info(
@@ -154,7 +157,7 @@ def monitor(id, type):
                 last.save()
             elif status_code == 3:
                 status = '监测到变化，最新值为{}'.format(content)
-                send_message(content, name, notifications)
+                send_message(content, name, notifications, img_url)
                 last.content = content
                 last.save()
             elif status_code == 0:
