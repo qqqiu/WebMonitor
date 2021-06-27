@@ -37,6 +37,7 @@ class Content(models.Model):
     task_id = models.IntegerField(null=False)
     content = models.CharField(max_length=512, null=False)
     task_type = models.CharField(max_length=32, null=False, default='html')
+    item_ids = models.CharField(max_length=512, null=True)
 
 
 class TaskStatus(models.Model):

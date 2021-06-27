@@ -22,14 +22,20 @@ class RequestsSelector(FatherSelector):
         html = r.text
         return html
 
-    def get_by_xpath(self, url, selector_dict, headers=None):
+    def get_by_xpath(self, url, selector_dict, count, last_item_ids, headers=None):
         html = self.get_html(url, headers)
+        results = []
+        for i in range(1, count):
+            result = OrderedDict()
+            for key, xpath_ext in selector_dict.items():
+                xpath_ext = xpath_ext.replace("multi_item_ids", str(i))
+                result[key] = self.xpath_parse(html, xpath_ext)
+            if last_item_ids is not None:
+                if result["itemurl"] in last_item_ids:
+                    break
+            results.append(result)
 
-        result = OrderedDict()
-        for key, xpath_ext in selector_dict.items():
-            result[key] = self.xpath_parse(html, xpath_ext)
-
-        return result
+        return results
 
     def get_by_css(self, url, selector_dict, headers=None):
         html = self.get_html(url, headers)

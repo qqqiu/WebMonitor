@@ -38,6 +38,8 @@ def get_content(url,
                 selector_type,
                 selector,
                 content_template,
+                count,
+                last_item_ids,
                 regular_expression=None,
                 headers=None,
                 debug=False):
@@ -59,7 +61,7 @@ def get_content(url,
             selector_dict[key] = value
 
     if selector_type == 0:
-        content_dict = selector_handler.get_by_xpath(url, selector_dict,
+        content_dict = selector_handler.get_by_xpath(url, selector_dict, count, last_item_ids,
                                                      headers)
     elif selector_type == 1:
         content_dict = selector_handler.get_by_css(url, selector_dict, headers)
@@ -70,14 +72,19 @@ def get_content(url,
         logger.error('无效选择器')
         raise Exception('无效选择器')
 
-    # 添加或替换保留字段：{url}
-    if 'url' in content_dict:
-        content_dict['url'] = url
-    content = wrap_template_content(content_dict, content_template)
+    contents = ""
+    for idx, content_dic in enumerate(content_dict):
+        # 添加或替换保留字段：{url}
+        if 'url' in content_dic:
+            content_dic['url'] = url
+        content = wrap_template_content(content_dic, content_template)
 
-    if regular_expression:
-        content = extract_by_re(content, regular_expression)
-    return content, content_dict
+        if regular_expression:
+            content = extract_by_re(content, regular_expression)
+        content = content + '<p><img src="cid:item_img_' + str(idx) + '"></p>'
+        contents += content
+        
+    return contents, content_dict,
 
 
 @func_set_timeout(10)

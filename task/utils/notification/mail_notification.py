@@ -30,7 +30,7 @@ class MailNotification(Notification):
         self.mail_sender = setting.mail_sender
         self.mail_password = setting.mail_password
 
-    def send(self, to, header, content, img_url=''):
+    def send(self, to, header, content, img_urls=[]):
         if to == '默认':
             logger.error('没有设置通知邮箱，无法发送邮件通知')
             raise Exception('没有设置通知邮箱，无法发送邮件通知')
@@ -40,11 +40,10 @@ class MailNotification(Notification):
         msgRoot['From'] = Header('新商品上架啦！', 'utf-8')
         msgRoot['Subject'] = Header(header, 'utf-8')
 
-        if img_url != '':
-            content = content + '<p><img src="cid:item_img"></p>'
+        for idx, img_url in enumerate(img_urls):
             response = requests.get(img_url)
             img = MIMEImage(response.content)
-            img.add_header('Content-ID', '<item_img>')  # 给一个content Id 供后面html内容引用
+            img.add_header('Content-ID', '<item_img_' + str(idx) + '>')  # 给一个content Id 供后面html内容引用
             msgRoot.attach(img)
 
         print(content)

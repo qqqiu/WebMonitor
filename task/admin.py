@@ -43,14 +43,14 @@ class TaskAdmin(ImportExportModelAdmin):
     resource_class = TaskResource
 
     list_display = [
-        'id', 'name', 'url', 'template', 'frequency', 'selector', 'create_time',
+        'id', 'name', 'url', 'frequency', 'selector', 'template', 'create_time',
         'is_chrome', 'regular_expression', 'rule', 'headers'
     ]
-    list_editable = ('name', 'url', 'frequency', 'is_chrome',
+    list_editable = ('name', 'url', 'frequency', 'is_chrome', 'template',
                      'regular_expression', 'rule', 'headers', 'selector')
     filter_horizontal = ('notification', )
 
-    list_per_page = 10
+    list_per_page = 50
 
     def has_delete_permission(self, request, obj=None):
         return False

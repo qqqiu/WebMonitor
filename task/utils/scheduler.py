@@ -28,7 +28,7 @@ def wraper_rss_msg(item):
     return res
 
 
-def send_message(content, header, notifications, img_url=''):
+def send_message(content, header, notifications, img_urls=[]):
     if len(notifications) == 0:
         raise Exception('通知方式为空')
 
@@ -48,7 +48,7 @@ def send_message(content, header, notifications, img_url=''):
                 content = markdown.markdown(content,
                                             output_format='html5',
                                             extensions=['extra'])
-                handler.send(notification_detail, header, content, img_url)
+                handler.send(notification_detail, header, content, img_urls)
         except Exception as e:
             fail += 1
             exception_content += 'Mail Exception: {};'.format(repr(e))
@@ -135,33 +135,47 @@ def monitor(id, type):
                 last = Content(task_id=id)
 
             last_content = last.content
-            content, content_dict = get_content(url, is_chrome, selector_type, selector,
-                                  content_template, regular_expression,
-                                  headers)
-            img_url = ''
-            if 'img' in content_dict:
-                img_url = content_dict['img']
-            global_content = content
-            status_code = is_changed(rule, content, last_content)
+            last_item_ids = last.item_ids
+            max_id = 11
+            if last_item_ids is None:
+                max_id = 4
+
+            img_urls = []
+            item_ids = ""
+            status_code = 0
+
+            contents, content_dict = get_content(url, is_chrome, selector_type, selector,
+                                content_template, max_id, last_item_ids, regular_expression,
+                                headers)
+
+            if len(content_dict) != 0:
+                status_code = 3
+                for idx, content in enumerate(content_dict):
+                    if 'itemurl' in content:
+                        item_ids += content['itemurl']
+                    if 'img' in content:
+                        img_urls.append(content['img'])
+
+            # status_code = is_changed(rule, content, last_content)
             logger.info(
-                'rule: {}, content: {}, last_content: {}, status_code: {}'.
-                format(rule, content, last_content, status_code))
+                'rule: {}, item_ids: {}, last_content: {}, status_code: {}'.
+                format(rule, item_ids, last_content, status_code))
             if status_code == 1:
-                status = '监测到变化，但未命中规则，最新值为{}'.format(content)
-                last.content = content
+                status = '监测到变化，但未命中规则，最新值为{}'.format(item_ids)
                 last.save()
             elif status_code == 2:
-                status = '监测到变化，且命中规则，最新值为{}'.format(content)
-                send_message(content, name, notifications)
-                last.content = content
+                status = '监测到变化，且命中规则，最新值为{}'.format(item_ids)
+                send_message(contents, name, notifications)
                 last.save()
             elif status_code == 3:
-                status = '监测到变化，最新值为{}'.format(content)
-                send_message(content, name, notifications, img_url)
-                last.content = content
+                status = '监测到变化，最新值为{}'.format(item_ids)
+                send_message(contents, name, notifications, img_urls)
+                last.item_ids = item_ids
                 last.save()
             elif status_code == 0:
-                status = '成功执行但未监测到变化，当前值为{}'.format(content)
+                status = '成功执行但未监测到变化，当前值为{}'.format(item_ids)                
+                last.item_ids = item_ids
+                last.save()
         elif type == 'rss':
             rss_task = RSSTask.objects.get(id=id)
             url = rss_task.url
